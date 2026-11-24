@@ -15,14 +15,14 @@ async function loadStudents() {
         // Dùng DocumentFragment để render nhanh, tránh gán += innerHTML nhiều lần trong vòng lặp
         const fragment = document.createDocumentFragment();
 
-        students.forEach((student) => {
+        students.forEach(function (student) {
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${student.id}</td>
                 <td class="fw-bold">${student.ten ?? ""}</td>
                 <td>${student.tuoi ?? ""}</td>
-                <td>${student.maSV ?? ""}</td>
-                <td>${student.diemTB ?? ""}</td>
+                <td>${student.maSV ?? student.masv ?? ""}</td>
+                <td>${student.diemTB ?? student.diemtb ?? ""}</td>
                 <td>${student.mail ?? ""}</td>
                 <td class="text-center">
                     <button type="button" class="btn btn-danger btn-sm" onclick="deleteStudent(${student.id})">Xóa</button>
@@ -70,7 +70,7 @@ studentForm.addEventListener("submit", async function (event) {
         }
     } catch (error) {
         console.error("Lỗi mạng hoặc CORS:", error);
-        alert("Không kết nối được tới API (kiểm tra server 8080 hoặc CORS).");
+        alert("Không kết nối được tới API trên Render (kiểm tra trạng thái server Render hoặc CORS).");
     }
 });
 
@@ -86,10 +86,13 @@ async function deleteStudent(id) {
             if (response.ok) {
                 await loadStudents();
             } else {
-                alert("Không thể xóa sinh viên này!");
+                const errText = await response.text();
+                console.error("Xóa lỗi:", response.status, errText);
+                alert(`Không thể xóa sinh viên này! (${response.status})`);
             }
         } catch (error) {
             console.error("Lỗi khi xóa:", error);
+            alert("Lỗi kết nối khi xóa sinh viên.");
         }
     }
 }
